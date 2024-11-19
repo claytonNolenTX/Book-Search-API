@@ -1,10 +1,9 @@
-Certainly! Here's a complete `README.md` file you can use for your project. It includes all the necessary steps for setting up the environment, running the app, and using version control. Feel free to modify any details to better fit your project.
-
----
-
 # Book Search App
 
 A Flask application that allows users to search for books via the [Open Library API](https://openlibrary.org/), with a frontend served from a static HTML page.
+
+Author: Clayton Nolen
+Last Modified: 18 Novemeber 2024
 
 ## Table of Contents
 
@@ -16,8 +15,6 @@ A Flask application that allows users to search for books via the [Open Library 
    - [Install Dependencies](#install-dependencies)
 3. [Running the Application](#running-the-application)
 4. [Testing the Application](#testing-the-application)
-5. [Deactivating the Virtual Environment](#deactivating-the-virtual-environment)
-6. [Contributing](#contributing)
 
 ---
 
