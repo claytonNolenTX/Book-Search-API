@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            background-color: #f4f4f4; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px;
+        }
+        .header {
+            color: #333; 
+            padding: 20px 20px 0; 
+            width: 100%; 
+            text-align: left;
+        }
+        h1 {
+            margin: 0; 
+            font-size: 32px; 
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .search-container {
+            width: 100%; 
+            max-width: 900px; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            gap: 10px;
+        }
+        #search-bar {
+            padding: 12px; 
+            width: 100%; 
+            max-width: 300px; 
+            border: 1px solid #ccc; 
+            border-radius: 12px; 
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        #search-type {
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 12px; 
+            font-size: 16px;
+            width: 200px;
+        }
+        #search-button {
+            padding: 12px 18px; 
+            background-color: #4a90e2; 
+            color: white; 
+            border: none; 
+            border-radius: 12px;
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: background-color 0.3s ease;
+        }
+        #search-button:hover {
+            background-color: #357ab8;
+        }
+        .results {
+            width: 100%; 
+            max-width: 900px; 
+            margin-top: 20px; 
+            background-color: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
+            overflow: hidden;
+        }
+        table {
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th, td {
+            border: 1px solid #ddd; 
+            padding: 14px; 
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f4f4f4; 
+            color: #333;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        img {
+            width: 50px; 
+            height: auto; 
+            border-radius: 6px; 
+        }
+        #loading {
+            display: none; 
+            margin: 20px; 
+            text-align: center; 
+            color: #777;
+        }
+        .error {
+            color: red; 
+            text-align: center; 
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Book Search</h1>
+    </div>
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="Enter book title, author, or genre...">
+        
+        <select id="search-type">
+            <option value="">Search Across All Fields</option>
+            <option value="title">Search by Title</option>
+            <option value="author">Search by Author</option>
+            <option value="subject">Search by Genre</option>
+        </select>
+        
+        <button id="search-button">Search</button>
+    </div>
+    <div class="results">
+        <table id="results">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div id="loading">Loading...</div>
+    <div id="error-message" class="error"></div>
+
+    <script>
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-bar').value.trim();
+            const searchType = document.getElementById('search-type').value;
+
+            if (query === '') {
+                alert('Please enter a book title, author, or genre');
+                return;
+            }
+            
+            searchBooks(query, searchType);
+        });
+
+        function searchBooks(query, searchType) {
+            const resultsTable = document.querySelector('#results tbody');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            resultsTable.innerHTML = '';
+            loading.style.display = 'block';
+            errorMessage.textContent = '';
+
+            // Construct the search URL based on the selected search type.
+            let url = `/search?title=${encodeURIComponent(query)}`;  // Default to title if no option selected
+            if (searchType === 'author') {
+                url = `/search?author=${encodeURIComponent(query)}`;
+            } else if (searchType === 'subject') {
+                url = `/search?subject=${encodeURIComponent(query)}`;
+            }
+
+            // Fetchs data from the Flask API.
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    if (data.length === 0) {
+                        errorMessage.textContent = 'No books found';
+                    } else {
+                        data.forEach(book => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td><a href="${book.link}" target="_blank"><img src="${book.image}" alt="${book.title} cover"></a></td>
+                                <td>${book.title}</td>
+                                <td>${book.author}</td>
+                            `;
+                            resultsTable.appendChild(row);
+                        });
+                    }
+                })
+                .catch(error => {
+                    errorMessage.textContent = `Error: ${error.message}`;
+                })
+                .finally(() => {
+                    loading.style.display = 'none';
+                });
+        }
+    </script>
+</body>
+</html>
